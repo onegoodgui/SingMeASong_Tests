@@ -38,7 +38,7 @@ async function getTop(amount: number) {
   return recommendationRepository.getAmountByScore(amount);
 }
 
-async function getRandom() {
+export async function getRandom() {
   const random = Math.random();
   const scoreFilter = getScoreFilter(random);
 
@@ -47,7 +47,7 @@ async function getRandom() {
     throw notFoundError();
   }
 
-  const randomIndex = Math.floor(Math.random() * recommendations.length);
+  const randomIndex = randomIndexGenerator(recommendations.length);
   return recommendations[randomIndex];
 }
 
@@ -72,6 +72,15 @@ function getScoreFilter(random: number) {
   return "lte";
 }
 
+export function randomIndexGenerator(recLength: number){
+  const randomIndex = Math.floor(Math.random() * recLength);
+  return randomIndex
+}
+
+async function removeAll(){
+  return await recommendationRepository.removeAll();
+}
+
 export const recommendationService = {
   insert,
   upvote,
@@ -80,4 +89,6 @@ export const recommendationService = {
   get,
   getById,
   getTop,
+  removeAll,
+  randomIndexGenerator
 };
