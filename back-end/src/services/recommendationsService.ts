@@ -90,5 +90,6 @@ export const recommendationService = {
   getById,
   getTop,
   removeAll,
+  getByScore,
   randomIndexGenerator
 };

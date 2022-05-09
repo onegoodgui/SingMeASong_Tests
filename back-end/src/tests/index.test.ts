@@ -5,6 +5,7 @@ import { deleteSong, insertSong } from './factories/songFactory.js';
 import app from '../app.js';
 import {jest} from '@jest/globals'
 import { recommendationService } from '../services/recommendationsService.js';
+import { recommendationRepository } from '../repositories/recommendationRepository.js';
 const agent = supertest(app);
 
 describe('Recommendations route "/recommendations" ', () => {
@@ -81,4 +82,56 @@ describe('Recommendations route "/recommendations" ', () => {
             await deleteSong({name:'Here'});
         })
     })
+})
+
+describe('Recommendations route "/recommendations" UNIT TESTS', () => {
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.resetAllMocks();
+    })
+
+    describe('POST "/"', () => {
+
+        it('should throw error 422 if input data is invalid', async() => {
+
+            const results = await agent.post('/recommendations').send({name: 'oi', youtubeLink: 'https://www.hltv.org/'})
+
+            expect(results.statusCode).toEqual(422);
+        })
+
+    })
+
+    describe('POST "/upvote"', () => {
+
+        it('should throw error 404 when recommendation is not found', async() => {
+
+            jest.spyOn(recommendationRepository, "find").mockResolvedValue(undefined);
+            await recommendationService.upvote(1).catch(e => expect(e.type).toBe('not_found'));
+
+        })
+    })
+
+    describe('POST "/downvote"', () => {
+
+        it('should throw error 404 when recommendation is not found', async() => {
+
+            jest.spyOn(recommendationRepository, "find").mockResolvedValue(undefined);
+            await recommendationService.downvote(1).catch(e => expect(e.type).toBe('not_found'));
+
+        })
+    })
+
+    describe('GET "/random"', () => {
+
+        it('should throw error when recommendations.length equal 0', async() => {
+            const expectedResult = [];
+            jest.spyOn(recommendationService, 'getByScore').mockResolvedValue(expectedResult);
+
+            const result = await recommendationService.getRandom();
+            expect(result).toBe(undefined);
+
+        })
+    })
+    
 })
