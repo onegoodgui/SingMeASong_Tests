@@ -12,9 +12,9 @@ app.use(express.json());
 app.use("/recommendations", recommendationRouter);
 app.use(errorHandlerMiddleware);
 
-if(process.env.NODE_ENV){
-    console.log('cypress testing')
-    app.use('/tests', testsRouter);
+if (process.env.NODE_ENV) {
+  console.log("cypress testing");
+  app.use("/tests", testsRouter);
 }
 
 export default app;

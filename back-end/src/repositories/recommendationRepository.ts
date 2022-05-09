@@ -18,7 +18,7 @@ function findAll(findAllWhere?: FindAllWhere) {
 
   return prisma.recommendation.findMany({
     where: filter,
-    orderBy: { id: "desc" }
+    orderBy: { id: "desc" },
   });
 }
 
@@ -62,8 +62,8 @@ async function remove(id: number) {
   });
 }
 
-async function removeAll(){
-  return await prisma.$executeRaw`TRUNCATE TABLE recommendations;`
+async function removeAll() {
+  return await prisma.$executeRaw`TRUNCATE TABLE recommendations;`;
 }
 export const recommendationRepository = {
   create,
@@ -72,5 +72,5 @@ export const recommendationRepository = {
   updateScore,
   getAmountByScore,
   remove,
-  removeAll
+  removeAll,
 };

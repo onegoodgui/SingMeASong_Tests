@@ -73,15 +73,14 @@ function getScoreFilter(random: number) {
   return "lte";
 }
 
-export function randomIndexGenerator(recLength: number){
+export function randomIndexGenerator(recLength: number) {
   const randomIndex = Math.floor(Math.random() * recLength);
-  return randomIndex
+  return randomIndex;
 }
 
-async function removeAll(){
+async function removeAll() {
   return await recommendationRepository.removeAll();
 }
-
 
 export const recommendationService = {
   insert,
@@ -93,5 +92,5 @@ export const recommendationService = {
   getByScore,
   getTop,
   removeAll,
-  randomIndexGenerator
+  randomIndexGenerator,
 };
