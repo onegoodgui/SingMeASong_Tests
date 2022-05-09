@@ -98,6 +98,12 @@ describe('Recommendations route "/recommendations" INTEGRATION TESTS ', () => {
 
 describe('Recommendations route "/recommendations" UNIT TESTS', () => {
 
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.resetAllMocks();
+    })
+
     describe('POST "/"', () => {
 
         it('should throw error 422 if input data is invalid', async() => {
@@ -134,8 +140,8 @@ describe('Recommendations route "/recommendations" UNIT TESTS', () => {
         it('should throw error when recommendations.length equal 0', async() => {
             const expectedResult = [];
             jest.spyOn(recommendationService, 'getByScore').mockResolvedValue(expectedResult);
-
-            expect(() => {recommendationService.getRandom()}).rejects
+            const result = await recommendationService.getRandom();
+            expect(result).toBe(undefined);
 
         })
     })
