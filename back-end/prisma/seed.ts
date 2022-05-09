@@ -39,7 +39,20 @@ async function main(){
             youtubeLink:'https://www.youtube.com/watch?v=DSMuhzSgOGE',
             score: 10
         }
+
     });
+
+    await prisma.recommendation.upsert({
+        where:{
+            name: 'Baby'
+        },
+        update:{},
+        create:{
+            name:'Baby',
+            youtubeLink:'https://www.youtube.com/watch?v=kffacxfA7G4',
+            score: -100
+        }
+    })
 
 }
 

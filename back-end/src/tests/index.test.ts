@@ -5,16 +5,21 @@ import { deleteSong, insertSong } from './factories/songFactory.js';
 import app from '../app.js';
 import {jest} from '@jest/globals'
 import { recommendationService } from '../services/recommendationsService.js';
+import { recommendationController } from '../controllers/recommendationController.js';
+import { recommendationSchema } from '../schemas/recommendationsSchemas.js';
+import { recommendationRepository } from '../repositories/recommendationRepository.js';
+import { getRandom } from '../services/recommendationsService.js';
+
 const agent = supertest(app);
 
-describe('Recommendations route "/recommendations" ', () => {
+describe('Recommendations route "/recommendations" INTEGRATION TESTS ', () => {
 
     describe('POST "/"', () => {
 
-        it('should have 4 songs stored when the given input is valid', async() => {
+        it('should have 5 songs stored when the given input is valid', async() => {
             await insertSong({name:'Here', youtubeLink:'https://www.youtube.com/watch?v=KuZbmLLv1vM'});
             const {body: results} = await agent.get('/recommendations');
-            expect(results.length).toBe(4);
+            expect(results.length).toBe(5);
             await deleteSong({name:'Here'});
         })
 
@@ -23,9 +28,9 @@ describe('Recommendations route "/recommendations" ', () => {
 
     describe('GET "/"', () => {
 
-        it('should retrieve 3 songs when endpoint is requested', async() =>{
+        it('should retrieve 4 songs when endpoint is requested', async() =>{
             const {body: results} = await agent.get('/recommendations');
-            expect(results.length).toBe(3);
+            expect(results.length).toBe(4);
         });
     })
 
@@ -72,7 +77,7 @@ describe('Recommendations route "/recommendations" ', () => {
     })
 
     describe('POST /:id/downvote', () => {
-        it('should add one to the score of the song inserted', async() => {
+        it('should subtract one to the score of the song inserted', async() => {
             const newSong = await insertSong({name:'Here', youtubeLink:'https://www.youtube.com/watch?v=KuZbmLLv1vM'});
             await agent.post(`/recommendations/${newSong.id}/downvote`);
             const {body: downvotedNewSong} = await agent.get(`/recommendations/${newSong.id}`);
@@ -80,5 +85,59 @@ describe('Recommendations route "/recommendations" ', () => {
             expect(downvotedNewSong.score).toEqual(newSong.score - 1);
             await deleteSong({name:'Here'});
         })
+
+        it('should remove the song with score < -5', async() => {
+            const badSong = await prisma.recommendation.findFirst({where:{name: 'Baby'}});
+            await agent.post(`/recommendations/${badSong.id}/downvote`);
+            const result = await prisma.recommendation.findFirst({where:{name: 'Baby'}});
+
+            expect(result).toBe(null);
+        })
     })
+})
+
+describe('Recommendations route "/recommendations" UNIT TESTS', () => {
+
+    describe('POST "/"', () => {
+
+        it('should throw error 422 if input data is invalid', async() => {
+
+            const results = await agent.post('/recommendations').send({name: 'oi', youtubeLink: 'https://www.hltv.org/'})
+
+            expect(results.statusCode).toEqual(422);
+        })
+
+    })
+
+    describe('POST "/upvote"', () => {
+
+        it('should throw error 404 when recommendation is not found', async() => {
+
+            jest.spyOn(recommendationRepository, "find").mockResolvedValue(undefined);
+            await recommendationService.upvote(1).catch(e => expect(e.type).toBe('not_found'));
+
+        })
+    })
+
+    describe('POST "/downvote"', () => {
+
+        it('should throw error 404 when recommendation is not found', async() => {
+
+            jest.spyOn(recommendationRepository, "find").mockResolvedValue(undefined);
+            await recommendationService.downvote(1).catch(e => expect(e.type).toBe('not_found'));
+
+        })
+    })
+
+    describe('GET "/random"', () => {
+
+        it('should throw error when recommendations.length equal 0', async() => {
+            const expectedResult = [];
+            jest.spyOn(recommendationService, 'getByScore').mockResolvedValue(expectedResult);
+
+            expect(() => {recommendationService.getRandom()}).rejects
+
+        })
+    })
+    
 })

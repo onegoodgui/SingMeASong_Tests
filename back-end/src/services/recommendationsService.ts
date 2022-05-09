@@ -43,6 +43,7 @@ export async function getRandom() {
   const scoreFilter = getScoreFilter(random);
 
   const recommendations = await getByScore(scoreFilter);
+
   if (recommendations.length === 0) {
     throw notFoundError();
   }
@@ -81,6 +82,7 @@ async function removeAll(){
   return await recommendationRepository.removeAll();
 }
 
+
 export const recommendationService = {
   insert,
   upvote,
@@ -88,6 +90,7 @@ export const recommendationService = {
   getRandom,
   get,
   getById,
+  getByScore,
   getTop,
   removeAll,
   randomIndexGenerator
